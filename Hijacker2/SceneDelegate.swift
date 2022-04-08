@@ -11,7 +11,53 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        if let url = URLContexts.first?.url{
+            print(url)
+            let components = URLComponents(
+                            url: url,
+                            resolvingAgainstBaseURL: false
+                        )!
+            ///let callBackUrl = components.queryItems?.first(where: $)
+            
+            
+            
+            var fakeSwishResponseUrl = "company://?res=%7B%22result%22:%22paid%22,%22amount%22:1,%22message%22:%22To%20Company%22,%22payee%22:%22+46738127016%22,%22version%22:2%7D"
+            
+            let appUrl = URL(string: fakeSwishResponseUrl)
+            
+            if UIApplication.shared.canOpenURL(appUrl! as URL) {
+                UIApplication.shared.open(appUrl!)
+            } else {
+                print("App not installed")
+            }
+            
+            
+            /**let v:String? = components.queryItems?.first(where: {$0.name == "res"})?.value
+            let data = Data(v.unsafelyUnwrapped.utf8)
+            let decoder = JSONDecoder()
+            let decoded = try? decoder.decode(Response.self, from: data)
+            if decoded != nil{
+                print(decoded.unsafelyUnwrapped.result)
+                var status: String = ""
+                if decoded.unsafelyUnwrapped.result == "paid"{
+                    print("Payment completed!")
+                    status = "Paid!"
+                }else{
+                    print("Payment not completed!")
+                    status = "Not Paid!"
+                }
+                let alertController = UIAlertController(title: "Payment Status: ", message: status, preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
+                    alertController.addAction(okAction)
+                    
+                    window?.rootViewController?.present(alertController, animated: true, completion: nil)
+            }else{
+                print("no data was returned")
+            }*/
+            
+        }
+    }
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
