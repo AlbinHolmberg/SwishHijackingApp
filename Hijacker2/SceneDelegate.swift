@@ -6,11 +6,26 @@
 //
 
 import UIKit
-
+struct Payee: Codable{
+    var value: String
+}
+struct Amount: Codable{
+    var value: Int
+}
+struct Message: Codable{
+    var value: String
+    var editable: Bool
+}
+struct PaymentInfo: Codable {
+    var version: Int
+    var payee: Payee
+    var amount: Amount
+    var message: Message
+}
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         if let url = URLContexts.first?.url{
             print(url)
@@ -18,43 +33,44 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                             url: url,
                             resolvingAgainstBaseURL: false
                         )!
-            ///let callBackUrl = components.queryItems?.first(where: $)
             
+            let paymentInfoJson: String? = components.queryItems?.first(where: {$0.name == "data"})?.value
+            print(paymentInfoJson)
+            let data = Data(paymentInfoJson.unsafelyUnwrapped.utf8)
+            let decoder = JSONDecoder()
+            let paymentInfo = try? decoder.decode(PaymentInfo.self, from: data)
+            if paymentInfoJson != nil{
+                
+            }
+            let callbackUrl: String? = components.queryItems?.first(where: {$0.name == "callbackurl"})?.value
+            let callbackParam: String? = components.queryItems?.first(where: {$0.name == "callbackresultparameter"})?.value
             
-            
-            var fakeSwishResponseUrl = "company://?res=%7B%22result%22:%22paid%22,%22amount%22:1,%22message%22:%22To%20Company%22,%22payee%22:%22+46738127016%22,%22version%22:2%7D"
-            
-            let appUrl = URL(string: fakeSwishResponseUrl)
-            
-            if UIApplication.shared.canOpenURL(appUrl! as URL) {
-                UIApplication.shared.open(appUrl!)
-            } else {
-                print("App not installed")
+            if paymentInfo != nil && callbackUrl != nil && callbackParam != nil{
+                var fakeSwishResponse: String = callbackUrl!;
+                
+                fakeSwishResponse += "?";
+                fakeSwishResponse += callbackParam!;
+                fakeSwishResponse += "=%7B%22result%22:%22paid%22,%22amount%22:";
+                fakeSwishResponse += String(paymentInfo!.amount.value);
+                fakeSwishResponse += ",%22message%22:%22"
+                fakeSwishResponse += paymentInfo!.message.value.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+                fakeSwishResponse += "%22,%22payee%22:%22"
+                fakeSwishResponse += paymentInfo!.payee.value
+                fakeSwishResponse += "%22,%22version%22:2%7D"
+                
+                print(fakeSwishResponse)
+                let appUrl = URL(string: fakeSwishResponse)
+                
+                if UIApplication.shared.canOpenURL(appUrl! as URL) {
+                    UIApplication.shared.open(appUrl!)
+                } else {
+                    print("App not installed")
+                }
+            }else{
+                print("invalid params")
             }
             
             
-            /**let v:String? = components.queryItems?.first(where: {$0.name == "res"})?.value
-            let data = Data(v.unsafelyUnwrapped.utf8)
-            let decoder = JSONDecoder()
-            let decoded = try? decoder.decode(Response.self, from: data)
-            if decoded != nil{
-                print(decoded.unsafelyUnwrapped.result)
-                var status: String = ""
-                if decoded.unsafelyUnwrapped.result == "paid"{
-                    print("Payment completed!")
-                    status = "Paid!"
-                }else{
-                    print("Payment not completed!")
-                    status = "Not Paid!"
-                }
-                let alertController = UIAlertController(title: "Payment Status: ", message: status, preferredStyle: .alert)
-                let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
-                    alertController.addAction(okAction)
-                    
-                    window?.rootViewController?.present(alertController, animated: true, completion: nil)
-            }else{
-                print("no data was returned")
-            }*/
             
         }
     }
