@@ -28,49 +28,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         if let url = URLContexts.first?.url{
-            print(url)
-            let components = URLComponents(
-                            url: url,
-                            resolvingAgainstBaseURL: false
-                        )!
-            
-            let paymentInfoJson: String? = components.queryItems?.first(where: {$0.name == "data"})?.value
-            print(paymentInfoJson)
-            let data = Data(paymentInfoJson.unsafelyUnwrapped.utf8)
-            let decoder = JSONDecoder()
-            let paymentInfo = try? decoder.decode(PaymentInfo.self, from: data)
-            if paymentInfoJson != nil{
-                
-            }
-            let callbackUrl: String? = components.queryItems?.first(where: {$0.name == "callbackurl"})?.value
-            let callbackParam: String? = components.queryItems?.first(where: {$0.name == "callbackresultparameter"})?.value
-            
-            if paymentInfo != nil && callbackUrl != nil && callbackParam != nil{
-                var fakeSwishResponse: String = callbackUrl!;
-                
-                fakeSwishResponse += "?";
-                fakeSwishResponse += callbackParam!;
-                fakeSwishResponse += "=%7B%22result%22:%22paid%22,%22amount%22:";
-                fakeSwishResponse += String(paymentInfo!.amount.value);
-                fakeSwishResponse += ",%22message%22:%22"
-                fakeSwishResponse += paymentInfo!.message.value.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
-                fakeSwishResponse += "%22,%22payee%22:%22"
-                fakeSwishResponse += paymentInfo!.payee.value
-                fakeSwishResponse += "%22,%22version%22:2%7D"
-                
-                print(fakeSwishResponse)
-                let appUrl = URL(string: fakeSwishResponse)
-                
-                if UIApplication.shared.canOpenURL(appUrl! as URL) {
-                    UIApplication.shared.open(appUrl!)
-                } else {
-                    print("App not installed")
-                }
-            }else{
-                print("invalid params")
-            }
-            
-            
+            let viewController = self.window?.rootViewController as? ViewController
+            viewController?.handlePaymentRequest(url: url)
             
         }
     }
