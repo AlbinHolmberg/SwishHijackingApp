@@ -5,8 +5,10 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>hijacker.Hijacker2</string>
+			<string>se.bankgirot.swish</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>swish</string>
